@@ -146,6 +146,7 @@ namespace 血狮2_全球战火启动器
         {
             try
             {
+                timer1.Enabled = false;
                 button1.Enabled = false;
                 button2.Enabled = false;
                 string downto = Application.StartupPath + @"\GameSDK\Levels\Singleplayer\";
@@ -182,6 +183,7 @@ namespace 血狮2_全球战火启动器
                 if (File.Exists(downto)) File.Delete(downto);
                 label1.Text = "请在上方选择地图！";
                 label3.Text = "等待开始";
+                timer1.Enabled = true;
                 progressBar1.Value = 0;
             }
             catch(Exception ee1)
@@ -196,6 +198,7 @@ namespace 血狮2_全球战火启动器
         {
             try
             {
+                timer1.Enabled = false;
                 button1.Enabled = false;
                 button2.Enabled = false;
                 string downto = Application.StartupPath + @"\GameSDK\Levels\Multiplayer\";
@@ -232,6 +235,7 @@ namespace 血狮2_全球战火启动器
                 if (File.Exists(downto)) File.Delete(downto);
                 label1.Text = "请在上方选择地图！";
                 label3.Text = "等待开始";
+                timer1.Enabled = true;
                 progressBar1.Value = 0;
             }
             catch(Exception ee2)

@@ -38,8 +38,31 @@ namespace 血狮2_全球战火启动器
             {
                 Process[] prorelease = Process.GetProcessesByName("GameSDK_Release");
                 Process[] dprorelease = Process.GetProcessesByName("DedicatedLauncher_Release");
-                if (prorelease.Length == 0) button1.Text = "启动游戏";
-                else button1.Text = "强行停止游戏";
+                if (prorelease.Length == 0)
+                {
+                    //checkBox1.Enabled = true;
+                    checkBox1.Text = "同时启动VPN联机";
+                    if (checkBox1.Checked == false)
+                    {
+                        button1.Text = "启动游戏";
+                    }
+                    else
+                    {
+                        button1.Text = "启动游戏和VPN";
+                    }
+                }
+                else
+                {
+                    checkBox1.Text = "同时关闭VPN联机";
+                    if (checkBox1.Checked == false)
+                    {
+                        button1.Text = "强行停止游戏";
+                    }
+                    else
+                    {
+                        button1.Text = "强行停止游戏和VPN";
+                    }
+                }
                 if (dprorelease.Length == 0) button2.Text = "启动服务器";
                 else button2.Text = "强行停止服务器";
             }
@@ -47,8 +70,30 @@ namespace 血狮2_全球战火启动器
             {
                 Process[] prodebug = Process.GetProcessesByName("GameSDK");
                 Process[] dprodebug = Process.GetProcessesByName("DedicatedLauncher");
-                if (prodebug.Length == 0) button1.Text = "启动游戏";
-                else button1.Text = "强行停止游戏";
+                if (prodebug.Length == 0){
+                    //checkBox1.Enabled = true;
+                    checkBox1.Text = "同时启动VPN联机";
+                    if (checkBox1.Checked == false)
+                    {
+                        button1.Text = "启动游戏";
+                    }
+                    else
+                    {
+                        button1.Text = "启动游戏和VPN";
+                    }
+                }
+                else
+                {
+                    checkBox1.Text = "同时关闭VPN联机";
+                    if (checkBox1.Checked == false)
+                    {
+                        button1.Text = "强行停止游戏";
+                    }
+                    else
+                    {
+                        button1.Text = "强行停止游戏和VPN";
+                    }
+                }
                 if (dprodebug.Length == 0) button2.Text = "启动服务器";
                 else button2.Text = "强行停止服务器";
             }
@@ -61,18 +106,59 @@ namespace 血狮2_全球战火启动器
         {
 
         }
+        private static readonly string CmdPath = @"C:\Windows\System32\cmd.exe";
+        public static void Runcmd(string cmd)
+        {
+            cmd = cmd.Trim().TrimEnd('&') + "&exit";//说明：不管命令是否成功均执行exit命令，否则当调用ReadToEnd()方法时，会处于假死状态
+            using (Process p = new Process())
+            {
+                p.StartInfo.FileName = CmdPath;
+                p.StartInfo.UseShellExecute = false;        //是否使用操作系统shell启动
+                p.StartInfo.RedirectStandardInput = true;   //接受来自调用程序的输入信息
+                p.StartInfo.RedirectStandardOutput = true;  //由调用程序获取输出信息
+                p.StartInfo.RedirectStandardError = true;   //重定向标准错误输出
+                p.StartInfo.CreateNoWindow = true;          //不显示程序窗口
+                p.Start();//启动程序
+
+                //向cmd窗口写入命令
+                p.StandardInput.WriteLine(cmd);
+                p.StandardInput.AutoFlush = true;
+                //p.StandardInput.WriteLine("exit");
+                //向标准输入写入要执行的命令。这里使用&是批处理命令的符号，表示前面一个命令不管是否执行成功都执行后面(exit)命令，如果不执行exit命令，后面调用ReadToEnd()方法会假死
+                //同类的符号还有&&和||前者表示必须前一个命令执行成功才会执行后面的命令，后者表示必须前一个命令执行失败才会执行后面的命令
+
+                //获取cmd窗口的输出信息
+                //output = p.StandardOutput.ReadToEnd();
+                p.WaitForExit();//等待程序执行完退出进程
+                p.Close();
+            }
+        }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (button1.Text == "启动游戏")
+            if (button1.Text != "强行停止游戏" && button1.Text != "强行停止游戏和VPN")
             {
+                if (checkBox1.Checked == true)
+                {
+                    try
+                    {
+                        Process p = new Process();
+                        p.StartInfo.UseShellExecute = true;
+                        p.StartInfo.FileName = @"C:\Program Files\SoftEther VPN Client\vpncmgr_x64.exe";
+                        p.Start();
+                    }
+                    catch(Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString()+"\n\n简短解释：可能是VPN客户端没有安装好，请安装SoftEther VPN到默认C盘目录");
+                    }
+                }
                 if (comboBox1.Text == "64位")
                 {
                     if (comboBox2.Text == "Debug")
                     {
                         try
                         {
-                            System.Diagnostics.Process p = new Process();
+                            Process p = new Process();
                             p.StartInfo.UseShellExecute = true;
                             p.StartInfo.FileName = @".\Bin64\GameSDK.exe";
                             p.Start();
@@ -131,10 +217,22 @@ namespace 血狮2_全球战火启动器
             }
             else
             {
-                Process[] _prorelease = Process.GetProcessesByName("GameSDK_Release");
-                Process[] _prodebug = Process.GetProcessesByName("GameSDK");
-                if (_prorelease.Length > 0) _prorelease[0].Kill();
-                if (_prodebug.Length > 0) _prodebug[0].Kill();
+                try
+                {
+                    Process[] _prorelease = Process.GetProcessesByName("GameSDK_Release");
+                    Process[] _prodebug = Process.GetProcessesByName("GameSDK");
+                    //Process[] _proVPN = Process.GetProcessesByName("vpnclient_x64");
+                    //Process[] _proVPNmgr = Process.GetProcessesByName("vpncmgr_x64");
+                    if (_prorelease.Length > 0) _prorelease[0].Kill();
+                    if (_prodebug.Length > 0) _prodebug[0].Kill();
+                    Runcmd(@"taskkill /im vpnclient_x64.exe");
+                    Runcmd(@"taskkill /im vpncmgr_x64.exe");
+
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(ex.ToString()+"\n\n简短解释：结束进程失败，可能是没有权限或已经结束\n也可能是因为VPN程序不是由本启动器启动");
+                }
             }
         }
 
@@ -228,7 +326,7 @@ namespace 血狮2_全球战火启动器
                 {
                     try
                     {
-                        System.Diagnostics.Process p = new Process();
+                        Process p = new Process();
                         p.StartInfo.UseShellExecute = true;
                         p.StartInfo.FileName = @".\Bin64\Editor.exe";
                         p.Start();
@@ -242,7 +340,7 @@ namespace 血狮2_全球战火启动器
                 {
                     try
                     {
-                        System.Diagnostics.Process p = new Process();
+                        Process p = new Process();
                         p.StartInfo.UseShellExecute = true;
                         p.StartInfo.FileName = @".\Bin32\Editor.exe";
                         p.Start();
@@ -266,10 +364,30 @@ namespace 血狮2_全球战火启动器
             helpform.Show();
         }
 
+        private void button5_Click(object sender, EventArgs e)
+        {
+            Form aboutform = new AboutBox1();
+            aboutform.Show();
+        }
+
         private void button4_Click(object sender, EventArgs e)
         {
-            Form upfrm = new Form3();
-            upfrm.Show();
+            Form frm3 = new Form3();
+            frm3.Show();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (button1.Text == "强行停止游戏"||button1.Text=="强行停止游戏和VPN")
+            {
+                if (checkBox1.Checked == true) button1.Text = "强行停止游戏和VPN";
+                else button1.Text = "强行停止游戏";
+            }
+            else
+            {
+                if (checkBox1.Checked == true) button1.Text = "启动游戏和VPN";
+                else button1.Text = "启动游戏";
+            }
         }
     }
 }

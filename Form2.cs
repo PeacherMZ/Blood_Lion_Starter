@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -21,10 +22,9 @@ namespace 血狮2_全球战火启动器
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void linkLabel3_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Form frm = new AboutBox1();
-            frm.Show();
+            Process.Start("https://shang.qq.com/wpa/qunwpa?idkey=5b992e4be8fdea5aafea9e424ca39fdba0fd3b793f3e265bc4de40e801a5d53a");
         }
     }
 }
